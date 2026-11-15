@@ -22,8 +22,8 @@ func New(shop *client.Client) *Server {
 	return &Server{shop: shop, plans: make(map[string]cartPlan), now: time.Now, random: rand.Read}
 }
 
-func (s *Server) MCP() *mcp.Server {
-	server := mcp.NewServer(&mcp.Implementation{Name: "tupinamba", Version: "v0.2.0"}, nil)
+func (s *Server) MCP(version string) *mcp.Server {
+	server := mcp.NewServer(&mcp.Implementation{Name: "tupinamba", Version: version}, nil)
 	readOnly := &mcp.ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true}
 	openWorld, destructive := true, true
 	write := &mcp.ToolAnnotations{DestructiveHint: &destructive, OpenWorldHint: &openWorld}

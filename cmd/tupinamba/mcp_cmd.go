@@ -13,7 +13,7 @@ import (
 )
 
 var runMCPServer = func(ctx context.Context, transport mcp.Transport) error {
-	return shopmcp.New(newClient()).MCP().Run(ctx, transport)
+	return shopmcp.New(newClient()).MCP(version).Run(ctx, transport)
 }
 
 func cmdMCP(args []string) error {

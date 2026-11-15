@@ -32,3 +32,10 @@ func TestToolErrorsProduceStructuredSafeLogs(t *testing.T) {
 		t.Fatal("error message leaked to logs")
 	}
 }
+
+func TestMCPUsesConfiguredServerVersion(t *testing.T) {
+	session := connect(t, New(nil))
+	if got := session.InitializeResult().ServerInfo.Version; got != "test" {
+		t.Fatalf("server version = %q, want test", got)
+	}
+}

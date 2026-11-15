@@ -130,7 +130,7 @@ func connect(t *testing.T, service *Server) *mcp.ClientSession {
 	t.Helper()
 	ctx := context.Background()
 	clientTransport, serverTransport := mcp.NewInMemoryTransports()
-	serverSession, err := service.MCP().Connect(ctx, serverTransport, nil)
+	serverSession, err := service.MCP("test").Connect(ctx, serverTransport, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
