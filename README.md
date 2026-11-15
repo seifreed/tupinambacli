@@ -55,6 +55,7 @@ El projecte no fa pagaments, no reserva estoc i no confirma comandes.
 | **Cistella Shopify** | Lectura, addició, quantitat absoluta, eliminació i buidatge |
 | **Traspàs al navegador** | URL específica per carregar la cistella visible |
 | **Recomanació amb agents** | Qualitat, gust, quantitats, ocasions, substitucions i restriccions |
+| **Claude Desktop** | Eines MCP locals per cercar, calcular i preparar canvis confirmats a la cistella |
 | **Dades estructurades** | Sortida de text, JSON i TOON |
 | **Auditoria integrada** | Format, `go vet`, tests, build, govulncheck i gosec |
 
@@ -117,6 +118,71 @@ Per a Codex:
 ```bash
 CLAUDE_SKILLS_DIR="$HOME/.codex/skills" ./scripts/install-skill.sh
 ```
+
+## Claude Desktop
+
+Claude Desktop es connecta al servidor MCP local inclòs en aquest projecte. El
+servidor s'executa al mateix ordinador i es comunica per `stdio`; també
+reutilitza la sessió i la memòria cau del CLI a `~/.tupinamba` (o al directori
+configurat amb `TUPINAMBA_CONFIG_DIR`). No cal cap servei MCP allotjat. Només
+cal connexió a Internet per consultar la botiga o modificar la cistella.
+
+Construeix l'extensió a l'ordinador on tens instal·lat Claude Desktop:
+
+```bash
+./scripts/build-claude-desktop.sh
+```
+
+L'script crea `dist/tupinamba-shop-<os>-<arch>.mcpb`. Necessita Go 1.26.11 o
+superior i Node.js/npm per empaquetar l'extensió. Per compilar-la per a un altre
+sistema, defineix `TUPINAMBA_GOOS` i `TUPINAMBA_GOARCH`, per exemple
+`TUPINAMBA_GOOS=windows TUPINAMBA_GOARCH=amd64`.
+
+A Claude Desktop, obre **Configuració → Extensions → Configuració avançada →
+Install Extension…**, selecciona el fitxer `.mcpb` generat i activa
+**Tupinamba Shop**. Si l'organització gestiona les extensions, pot ser que
+l'administrador hagi d'autoritzar aquesta extensió local. El codi de l'extensió
+és el d'aquest repositori.
+
+Per consultar el catàleg no cal iniciar sessió. Per llegir o modificar la
+cistella, inicia sessió amb el CLI abans d'obrir Claude Desktop; el servidor
+MCP reutilitza aquesta sessió:
+
+```bash
+tupinamba login --from-browser chrome
+tupinamba whoami
+```
+
+La importació de Chrome està disponible a macOS. A altres entorns, configura la
+sessió amb el mecanisme admès pel CLI (`set-cookie --stdin` o `import-har`) i
+comprova-la amb `tupinamba whoami`.
+
+Claude pot cercar al catàleg, consultar variants, calcular un subtotal proposat
+i llegir la cistella actual. Els canvis a la cistella tenen dos passos: primer
+Claude presenta un pla amb el producte, les quantitats, el subtotal estimat i
+una frase de confirmació d'un sol ús. Revisa'l i respon amb aquesta frase
+exacta només si l'aproves; aleshores Claude aplica aquell canvi. Fixar la
+quantitat a zero elimina la variant. L'extensió no pot fer comandes: el pagament
+es completa al navegador.
+
+El servidor no escriu dades del protocol ni logs de diagnòstic a `stdout`, per
+mantenir intacta la comunicació MCP. Les eines no retornen les cookies de sessió
+ni els tokens de la cistella. Les descripcions de producte provenen de la botiga
+i es tracten com a contingut no fiable. Els errors retornats a Claude no
+inclouen cossos de resposta remots ni credencials. Els logs estructurats van a
+`stderr`; `TUPINAMBA_LOG_LEVEL=trace|debug|info|warn|error` en controla el nivell
+i `TUPINAMBA_LOG_FORMAT=text` activa el format llegible.
+
+La SKILL `tupinamba-shop` també descriu aquest flux per a Claude Desktop. Per
+afegir-hi les instruccions de selecció de producte, crea un ZIP amb tota la
+carpeta de la SKILL i puja'l a **Customize → Skills → + → + Create skill →
+Upload a skill**:
+
+```bash
+cd .claude/skills && zip -r ../../tupinamba-shop-skill.zip tupinamba-shop
+```
+
+La SKILL és opcional: les eines funcionals les proporciona l'extensió MCP.
 
 ---
 

@@ -12,6 +12,24 @@ description: >-
 Use the local `tupinamba` CLI to turn natural-language requests or photographed
 lists into live products and, when requested, a prepared Shopify cart.
 
+## Claude Desktop
+
+When the `Tupinamba Shop` MCP extension is enabled in Claude Desktop, use its
+tools instead of shell commands:
+
+- Discover products with `search_products`, then inspect finalists with
+  `get_product`.
+- Inspect the existing cart with `cart_status` and price a proposal with
+  `calculate_total`.
+- Use `plan_cart_change` to show the exact product, variant, quantity change,
+  projected subtotal, and confirmation phrase. Wait for the user's explicit
+  approval of that plan before calling `apply_cart_change` with the exact
+  phrase. Never infer approval from the initial shopping request.
+- `set` quantity zero removes that variant. The Desktop tools do not place an
+  order; the user reviews the returned browser cart URL and completes checkout.
+
+If those MCP tools are unavailable, follow the CLI workflows below.
+
 ## Safety contract
 
 1. Exploration, comparison, and totals are read-only. Before the first
