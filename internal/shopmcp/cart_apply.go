@@ -1,4 +1,4 @@
-package desktopmcp
+package shopmcp
 
 import (
 	"context"

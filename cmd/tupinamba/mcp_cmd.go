@@ -9,11 +9,11 @@ import (
 	"syscall"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/seifreed/tupinambacli/internal/desktopmcp"
+	"github.com/seifreed/tupinambacli/internal/shopmcp"
 )
 
 var runMCPServer = func(ctx context.Context, transport mcp.Transport) error {
-	return desktopmcp.New(newClient()).MCP().Run(ctx, transport)
+	return shopmcp.New(newClient()).MCP().Run(ctx, transport)
 }
 
 func cmdMCP(args []string) error {
