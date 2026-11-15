@@ -68,6 +68,8 @@ func run(args []string) (exitCode int) {
 		err = cmdCart(args[1:])
 	case "checkout":
 		err = cmdCheckout(args[1:])
+	case "mcp":
+		err = cmdMCP(args[1:])
 	case "version", "--version", "-v":
 		fmt.Println(version)
 	case "help", "-h", "--help":

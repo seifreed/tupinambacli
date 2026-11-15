@@ -20,6 +20,7 @@ USAGE:
   tupinamba whoami
   tupinamba cart get|add|set|clear [--variant sku|id] [--max eur] [--json|--toon]
   tupinamba checkout [status] [--max eur] [--json|--toon]
+  tupinamba mcp
 
 ENV:
   TUPINAMBA_CONFIG_DIR    override ~/.tupinamba

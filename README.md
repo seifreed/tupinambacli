@@ -119,70 +119,37 @@ Per a Codex:
 CLAUDE_SKILLS_DIR="$HOME/.codex/skills" ./scripts/install-skill.sh
 ```
 
-## Claude Desktop
+## MCP per a Claude Code i Codex
 
-Claude Desktop es connecta al servidor MCP local inclòs en aquest projecte. El
-servidor s'executa al mateix ordinador i es comunica per `stdio`; també
-reutilitza la sessió i la memòria cau del CLI a `~/.tupinamba` (o al directori
-configurat amb `TUPINAMBA_CONFIG_DIR`). No cal cap servei MCP allotjat. Només
-cal connexió a Internet per consultar la botiga o modificar la cistella.
-
-Construeix l'extensió a l'ordinador on tens instal·lat Claude Desktop:
+El CLI ja pot arrencar el servidor MCP. Només cal compilar-lo una vegada i
+registrar la mateixa comanda al client que facis servir:
 
 ```bash
-./scripts/build-claude-desktop.sh
+go build -o ./tupinamba ./cmd/tupinamba
+
+# Claude Code
+claude mcp add --scope user tupinamba -- "$(pwd)/tupinamba" mcp
+
+# O bé Codex
+codex mcp add tupinamba -- "$(pwd)/tupinamba" mcp
 ```
 
-L'script crea `dist/tupinamba-shop-<os>-<arch>.mcpb`. Necessita Go 1.26.11 o
-superior i Node.js/npm per empaquetar l'extensió. Per compilar-la per a un altre
-sistema, defineix `TUPINAMBA_GOOS` i `TUPINAMBA_GOARCH`, per exemple
-`TUPINAMBA_GOOS=windows TUPINAMBA_GOARCH=amd64`.
+Reinicia el client. `claude mcp list` o `codex mcp list` confirma que s'ha
+registrat. El servidor reutilitza `~/.tupinamba`; per tant, no cal iniciar
+sessió per cercar. Si vols operar sobre la cistella que ja tens al navegador,
+importa la sessió amb el CLI abans. Sense aquesta sessió, el servidor treballa
+amb una cistella nova.
 
-A Claude Desktop, obre **Configuració → Extensions → Configuració avançada →
-Install Extension…**, selecciona el fitxer `.mcpb` generat i activa
-**Tupinamba Shop**. Si l'organització gestiona les extensions, pot ser que
-l'administrador hagi d'autoritzar aquesta extensió local. El codi de l'extensió
-és el d'aquest repositori.
+El servidor parla per `stdio`, reserva `stdout` per al protocol i escriu els
+logs a `stderr`. Exposa cerques, fitxes de producte, estat de cistella, càlculs
+i canvis de cistella amb confirmació. Perquè l'agent també segueixi les
+instruccions de compra del projecte, instal·la la SKILL amb
+`./scripts/install-skill.sh` (Claude Code) o
+`CLAUDE_SKILLS_DIR="$HOME/.codex/skills" ./scripts/install-skill.sh` (Codex).
 
-Per consultar el catàleg no cal iniciar sessió. Per llegir o modificar la
-cistella, inicia sessió amb el CLI abans d'obrir Claude Desktop; el servidor
-MCP reutilitza aquesta sessió:
-
-```bash
-tupinamba login --from-browser chrome
-tupinamba whoami
-```
-
-La importació de Chrome està disponible a macOS. A altres entorns, configura la
-sessió amb el mecanisme admès pel CLI (`set-cookie --stdin` o `import-har`) i
-comprova-la amb `tupinamba whoami`.
-
-Claude pot cercar al catàleg, consultar variants, calcular un subtotal proposat
-i llegir la cistella actual. Els canvis a la cistella tenen dos passos: primer
-Claude presenta un pla amb el producte, les quantitats, el subtotal estimat i
-una frase de confirmació d'un sol ús. Revisa'l i respon amb aquesta frase
-exacta només si l'aproves; aleshores Claude aplica aquell canvi. Fixar la
-quantitat a zero elimina la variant. L'extensió no pot fer comandes: el pagament
-es completa al navegador.
-
-El servidor no escriu dades del protocol ni logs de diagnòstic a `stdout`, per
-mantenir intacta la comunicació MCP. Les eines no retornen les cookies de sessió
-ni els tokens de la cistella. Les descripcions de producte provenen de la botiga
-i es tracten com a contingut no fiable. Els errors retornats a Claude no
-inclouen cossos de resposta remots ni credencials. Els logs estructurats van a
-`stderr`; `TUPINAMBA_LOG_LEVEL=trace|debug|info|warn|error` en controla el nivell
-i `TUPINAMBA_LOG_FORMAT=text` activa el format llegible.
-
-La SKILL `tupinamba-shop` també descriu aquest flux per a Claude Desktop. Per
-afegir-hi les instruccions de selecció de producte, crea un ZIP amb tota la
-carpeta de la SKILL i puja'l a **Customize → Skills → + → + Create skill →
-Upload a skill**:
-
-```bash
-cd .claude/skills && zip -r ../../tupinamba-shop-skill.zip tupinamba-shop
-```
-
-La SKILL és opcional: les eines funcionals les proporciona l'extensió MCP.
+Per Claude Desktop, continua disponible l'extensió local: construeix-la amb
+`./scripts/build-claude-desktop.sh` i instal·la el `.mcpb` des de Configuració →
+Extensions → Configuració avançada.
 
 ---
 
