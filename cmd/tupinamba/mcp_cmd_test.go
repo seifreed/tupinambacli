@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"os/exec"
+	"time"
+
+	"github.com/seifreed/tupinambacli/internal/client"
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -28,6 +31,9 @@ func TestCmdMCPValidatesArgsAndHandlesServerResults(t *testing.T) {
 	}
 	if err := cmdMCP(nil); err != nil {
 		t.Fatalf("normal stop: %v", err)
+	}
+	if code := run([]string{"mcp"}); code != 0 {
+		t.Fatalf("mcp command exit code=%d", code)
 	}
 	runMCPServer = func(context.Context, mcp.Transport) error { return context.Canceled }
 	if err := cmdMCP(nil); err != nil {
@@ -64,5 +70,42 @@ func TestTupinambaBinaryExposesMCPToolsOverStdio(t *testing.T) {
 		if !found[name] {
 			t.Errorf("tupinamba mcp did not expose %s", name)
 		}
+	}
+}
+
+func TestRunMCPServerUsesSDKTransport(t *testing.T) {
+	previousClient := newClient
+	newClient = func() *client.Client { return &client.Client{} }
+	t.Cleanup(func() { newClient = previousClient })
+	ctx, cancel := context.WithCancel(context.Background())
+	clientTransport, serverTransport := mcp.NewInMemoryTransports()
+	done := make(chan error, 1)
+	go func() { done <- runMCPServer(ctx, serverTransport) }()
+	session, err := mcp.NewClient(&mcp.Implementation{Name: "mcp-server-test", Version: "1"}, nil).Connect(ctx, clientTransport, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, err := range session.Tools(ctx, nil) {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := session.Close(); err != nil {
+		t.Fatal(err)
+	}
+	cancel()
+	select {
+	case err := <-done:
+		if err != nil && !errors.Is(err, context.Canceled) {
+			t.Fatalf("server returned %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("MCP server did not stop")
+	}
+}
+
+func TestRunVersionCommand(t *testing.T) {
+	if code := run([]string{"version"}); code != 0 {
+		t.Fatalf("version exit code=%d", code)
 	}
 }
