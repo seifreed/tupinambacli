@@ -147,9 +147,35 @@ instruccions de compra del projecte, instal·la la SKILL amb
 `./scripts/install-skill.sh` (Claude Code) o
 `CLAUDE_SKILLS_DIR="$HOME/.codex/skills" ./scripts/install-skill.sh` (Codex).
 
-Per Claude Desktop, continua disponible l'extensió local: construeix-la amb
-`./scripts/build-claude-desktop.sh` i instal·la el `.mcpb` des de Configuració →
-Extensions → Configuració avançada.
+### Claude Desktop
+
+Claude Desktop instal·la el servidor com una extensió local `.mcpb`:
+
+1. Des del repositori, executa `./scripts/build-claude-desktop.sh`. Es generarà
+   `dist/tupinamba-shop-<sistema>-<arquitectura>.mcpb`. Cal Go 1.26.11 o
+   superior i Node.js/npm per empaquetar-lo.
+2. A Claude Desktop, obre **Settings → Desktop app → Manage** al costat
+   d'**Extensions** (en versions anteriors: **Settings → Extensions**).
+3. A **Advanced settings → Extension Developer**, selecciona **Install
+   Extension…**, tria el fitxer `.mcpb` i segueix les instruccions. Consulta la
+   [guia oficial de Claude Desktop](https://support.claude.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop).
+4. Comprova que aparegui a **+ → Connectors**. Si no hi són les eines, reinicia
+   Claude Desktop. L'estat i els logs de l'extensió són a la configuració
+   d'Extensions.
+
+L'extensió reutilitza `~/.tupinamba`. Cercar productes no requereix sessió; per
+veure la cistella ja oberta al navegador, importa'n la sessió amb el CLI abans
+d'iniciar Claude Desktop. Sense importar-la, es fa servir una cistella nova.
+Les eines poden cercar, consultar productes, calcular totals i preparar canvis
+de cistella amb confirmació; no poden fer una comanda ni retornen cookies.
+
+La SKILL és opcional. Per afegir les instruccions de compra a Claude Desktop,
+crea un ZIP amb la carpeta `.claude/skills/tupinamba-shop` i puja'l des de
+**Customize → Skills → + → Create skill → Upload a skill**:
+
+```bash
+cd .claude/skills && zip -r ../../tupinamba-shop-skill.zip tupinamba-shop
+```
 
 ---
 
