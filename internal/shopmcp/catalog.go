@@ -11,17 +11,17 @@ import (
 	"time"
 )
 
-func (s *Server) searchProducts(ctx context.Context, _ *mcp.CallToolRequest, in SearchInput) (toolResult *mcp.CallToolResult, output []ProductOutput, resultErr error) {
+func (s *Server) searchProducts(ctx context.Context, _ *mcp.CallToolRequest, in SearchInput) (toolResult *mcp.CallToolResult, output SearchOutput, resultErr error) {
 	started := time.Now()
 	defer func() { s.logTool(ctx, "search_products", started, resultErr) }()
 	if strings.TrimSpace(in.Query) == "" || len([]rune(in.Query)) > 100 || in.Limit < 1 || in.Limit > maxSearchResults {
-		return nil, nil, errors.New("query must be 1-100 characters and limit must be between 1 and 20")
+		return nil, SearchOutput{}, errors.New("query must be 1-100 characters and limit must be between 1 and 20")
 	}
 	products, err := s.shop.Search(in.Query, in.Limit)
 	if err != nil {
-		return nil, nil, err
+		return nil, SearchOutput{}, err
 	}
-	return nil, productOutputs(products), nil
+	return nil, SearchOutput{Products: productOutputs(products)}, nil
 }
 
 func (s *Server) getProduct(ctx context.Context, _ *mcp.CallToolRequest, in ProductInput) (toolResult *mcp.CallToolResult, output ProductOutput, resultErr error) {

@@ -24,6 +24,10 @@ type ProductOutput struct {
 	Variants    []VariantOutput `json:"variants"`
 }
 
+type SearchOutput struct {
+	Products []ProductOutput `json:"products"`
+}
+
 type VariantOutput struct {
 	ID         int64  `json:"id"`
 	SKU        string `json:"sku,omitempty"`

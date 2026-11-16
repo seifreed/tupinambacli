@@ -15,6 +15,10 @@ func TestCatalogToolsAndCartOutputAreSafe(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		schema, ok := tool.OutputSchema.(map[string]any)
+		if !ok || schema["type"] != "object" {
+			t.Errorf("tool %s has a non-object MCP output schema: %#v", tool.Name, tool.OutputSchema)
+		}
 		if _, ok := want[tool.Name]; ok {
 			want[tool.Name] = true
 		}
@@ -24,8 +28,8 @@ func TestCatalogToolsAndCartOutputAreSafe(t *testing.T) {
 			t.Errorf("missing tool %q", name)
 		}
 	}
-	products := output[[]ProductOutput](t, callTool(t, session, "search_products", map[string]any{"query": "arabica", "limit": 5}))
-	if len(products) != 1 || products[0].Handle != "arabica" {
+	products := output[SearchOutput](t, callTool(t, session, "search_products", map[string]any{"query": "arabica", "limit": 5}))
+	if len(products.Products) != 1 || products.Products[0].Handle != "arabica" {
 		t.Fatalf("products: %#v", products)
 	}
 	product := output[ProductOutput](t, callTool(t, session, "get_product", map[string]any{"ref": "arabica"}))
